@@ -9,6 +9,7 @@ public enum Systems {
     SER_1("Service 1"),
     SER_2("Service 2");
 
+
     private final String system;
 
     Systems(String system) {

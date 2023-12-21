@@ -3,43 +3,37 @@ package com.example.Lab2.controller;
 import com.example.Lab2.exception.UnsupportedCodeException;
 import com.example.Lab2.exception.ValidationFailedException;
 import com.example.Lab2.model.*;
-import com.example.Lab2.service.ModifyRequestService;
-import com.example.Lab2.service.ModifyResponseService;
 import com.example.Lab2.service.ValidationService;
 import com.example.Lab2.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Slf4j
 @RestController
 public class MyController {
     private final ValidationService validationService;
-    private final ModifyResponseService modifyResponseService;
-    private final ModifyRequestService modifyRequestService;
 
     @Autowired
-    public MyController(ValidationService validationService,
-                        @Qualifier("ModifySystemTimeResponseService") ModifyResponseService modifyResponseService,
-                        ModifyRequestService modifyRequestService) {
+    public MyController(ValidationService validationService) {
         this.validationService = validationService;
-        this.modifyResponseService = modifyResponseService;
-        this.modifyRequestService = modifyRequestService;
     }
 
     @PostMapping(value = "/feedback")
-    public ResponseEntity<Response> feedback(@Valid @RequestBody Request request, BindingResult bindingResult){
+    public ResponseEntity<Response> feedback(@RequestParam("time") String time_ms, @Valid @RequestBody Request request, BindingResult bindingResult){
 
         log.info("request: {}", request);
+        log.info("time of coming request ms: {}", System.currentTimeMillis() - Long.parseLong(time_ms));
 
         Response response = Response.builder()
                 .uid(request.getUid())
@@ -69,9 +63,6 @@ public class MyController {
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        modifyResponseService.modify(response);
-        modifyRequestService.modify(request);
-
-        return new ResponseEntity<>(modifyResponseService.modify(response), HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }
